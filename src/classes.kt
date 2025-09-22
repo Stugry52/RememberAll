@@ -27,6 +27,14 @@ class Player{
             println("Исцеление не возможно")
         }
     }
+
+    fun bufAttack(buf: Int){
+        damage += buf
+        println("Игрок $name, повышает наносимый урон на $buf. Теперь урон равен $damage ")
+    }
+    fun attackDamage(){
+        println("Игрок $name наносит $damage")
+    }
 }
 
 fun main(){
@@ -38,4 +46,6 @@ fun main(){
     // Точка это вывод объекта
     warrior.takeDamage(30) // Герой
     warrior.heal(10)
+    warrior.bufAttack(3)
+    warrior.attackDamage()
 }
