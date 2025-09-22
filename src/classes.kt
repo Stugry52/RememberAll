@@ -48,4 +48,5 @@ fun main(){
     warrior.heal(10)
     warrior.bufAttack(3)
     warrior.attackDamage()
+    // Yes
 }
