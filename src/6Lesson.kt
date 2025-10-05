@@ -5,13 +5,15 @@ open class Character(
     val name: String,
     maxHealth: Int,
     baseAttack: Int,
-    level: Int
+    level: Int, maxXp: Int
 ){
     // protected - доступен дял использования в классе и наследниках этого класса
     protected var _health = maxHealth.coerceAtLeast(1)
     protected var _maxHealth = maxHealth.coerceAtLeast(1)
     protected var _attack = baseAttack.coerceAtLeast(1)
     protected var _level = level.coerceAtLeast(1)
+    protected var _xp = maxXp.coerceAtMost(10)
+    protected var _maxXp = maxXp.coerceAtLeast(1)
 
     // open - разрешаем переопределения метода в наследниках класса
     open val health: Int
@@ -28,6 +30,10 @@ open class Character(
 
     open val isAlive: Boolean
         get() = _health > 0
+    open val xp: Int
+        get() = _xp
+    open val maxXp: Int
+        get() = _maxXp
 
     init {
         println("Создан персонаж: $name")
@@ -59,28 +65,36 @@ open class Character(
         val damage = calculateDamage(_attack)
         println("$name атакует ${target.name}!")
         target.takeDamage(damage)
+        _xp += 8
+        println("Получено 8 xp, количесто $_xp")
         levelUp()
+
     }
 
     open fun printStatus(){
         val status = if (isAlive) "Жив" else "Нежив"
-        println("$name: $_health/$_maxHealth HP, ATK: $_attack ($status)")
+        println("$name, уровень $_level:XP: $_xp/$_maxXp $_health/$_maxHealth HP, ATK: $_attack ($status)")
     }
 
     open fun levelUp(){
-        if(!isAlive) return
+        if(_level == 10 || !isAlive) return
 
-        if(attack > 1){
-            _level += 1
-            _maxHealth +=2
-            _attack += 1
+        while (_xp >= _maxXp){
+            _level++
+            _xp -= _maxXp
+            _maxXp *= 2
+            val BufATK = 1 * _level
+            _attack += BufATK
+            val BufHP = 2 * _level
+            _maxHealth += BufHP
+            println("Игрок $name повысил свой уровень до $_level, урон усилен до $_attack и здоровье до $_maxHealth")
         }
     }
 }
 
 // класс наследник Warrior (Дочерний класс)
 // : Character(name, maxHealth, baseAttack) - наследование и вызо конструктора родителя
-class Warrior(name: String, maxHealth: Int, baseAttack: Int, level: Int) : Character(name, maxHealth, baseAttack, level){
+class Warrior(name: String, maxHealth: Int, baseAttack: Int, level: Int, maxXp: Int) : Character(name, maxHealth, baseAttack, level, maxXp){
 
     // Дополнительное свойство, спецефичное для Класса Воина
     var armor: Int = 5
@@ -106,15 +120,17 @@ class Warrior(name: String, maxHealth: Int, baseAttack: Int, level: Int) : Chara
             val damage = calculateDamage(_attack * 2) // Удвоенный урон
             println("$name использует ульту")
             target.takeDamage(damage)
+            levelUp()
         }else{
             println("у $name недостаточно НР дял мощной атаки")
             attack(target)
+            levelUp()
         }
-        levelUp()
+
     }
 }
 
-class Mage(name: String, maxHealth: Int, baseAttack: Int, level: Int) : Character(name, maxHealth, baseAttack, level){
+class Mage(name: String, maxHealth: Int, baseAttack: Int, level: Int, maxXp: Int) : Character(name, maxHealth, baseAttack, level, maxXp){
 
     var mana: Int = 100
     val maxMana: Int = 100
@@ -128,12 +144,14 @@ class Mage(name: String, maxHealth: Int, baseAttack: Int, level: Int) : Characte
             println("$name атакует магическим посохом и тратит 10 маны")
             target.takeDamage(damage)
             println("Осталось маны: $mana/$maxMana")
+            levelUp()
         }else{
             // Обычная атака, если маны
             println("У $name недостаточно маны")
             super.attack(target) // Вызов базовой (не измененной) реализации в атаки
+            levelUp()
         }
-        levelUp()
+
     }
 
     fun caltFireball(target: Character){
@@ -157,7 +175,7 @@ class Mage(name: String, maxHealth: Int, baseAttack: Int, level: Int) : Characte
     }
 }
 
-class Archer(name: String, maxHealth: Int, baseAttack: Int, level: Int) : Character(name, maxHealth, baseAttack, level){
+class Archer(name: String, maxHealth: Int, baseAttack: Int, level: Int, maxXp: Int) : Character(name, maxHealth, baseAttack, level, maxXp){
     var agility = 30
     val maxAgility = 30
 
@@ -172,23 +190,26 @@ class Archer(name: String, maxHealth: Int, baseAttack: Int, level: Int) : Charac
             println("$name уклонился от урона и наносит усилиный урон на $krit, нанесен $damage урона")
             target.takeDamage(damage)
             println("Осталось сил: $agility/$maxAgility")
+            levelUp()
         }else{
             val damage = calculateDamage(_attack)
             println("Был нанесен обычный урон $damage")
             target.takeDamage(damage)
             super.attack(target)
+            levelUp()
         }
-        levelUp()
+
     }
 }
 
 fun main(){
     println("=== Бой с системой классов персонажей ===")
 
-    val warrior = Warrior("Варио", 120, 16, 1)
-    val mage = Mage("Извинись", 80, 10, 1)
-    val enemy = Warrior("ОРОРок", 100, 14, 5)
-    val archer = Archer("Арчер", 70,18, 1)
+    val warrior = Warrior("Варио", 120, 16, 1, 10)
+    val mage = Mage("Извинись", 80, 10, 1, 10)
+    val enemy = Warrior("ОРОРок", 100, 14, 5, 100)
+    val archer = Archer("Арчер", 70,18, 1, 10)
+    val goblin = Warrior("Гоблин_1",60,10,1,10)
 
     println(">>> Начало боя <<<")
     warrior.powerfullStrike(enemy)
@@ -204,4 +225,23 @@ fun main(){
 
     warrior.takeDamage(20)
     mage.attack(enemy)
+
+    warrior.attack(mage)
+    warrior.attack(mage)
+    warrior.attack(mage)
+    warrior.attack(mage)
+    warrior.attack(mage)
+    warrior.attack(mage)
+    warrior.attack(mage)
+    warrior.attack(mage)
+    warrior.attack(mage)
+    warrior.attack(mage)
+    warrior.printStatus()
+    warrior.attack(goblin)
+    warrior.attack(goblin)
+    warrior.attack(goblin)
+    warrior.attack(goblin)
+    warrior.attack(goblin)
+    warrior.attack(goblin)
+    warrior.printStatus()
 }
