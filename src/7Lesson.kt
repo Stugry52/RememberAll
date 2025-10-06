@@ -9,7 +9,7 @@ open class Character(val name: String, var health: Int, val attack: Int){
         if(health <= 0) println("$name пал в бою!")
     }
 
-    fun attack(target: Character){
+    open fun attack(target: Character){
         if (!isAlive || !target.isAlive) return
         val damage = Random.nextInt(attack - 3, attack + 4) // Случайный урон в диапозоне
         println("$name атакует ${target.name}")
@@ -17,7 +17,7 @@ open class Character(val name: String, var health: Int, val attack: Int){
     }
 }
 
-class Player(name: String, health: Int, attack: Int): Character(name, health, attack){
+class Player(name: String, health: Int, attack: Int, var shield: Boolean = false): Character(name, health, attack){
     var potions = 3 // Количество зелий здоровья (индивидуальный аттрибут(параметр) дочернего класса)
 
     fun usePotions(){
@@ -37,6 +37,18 @@ class Player(name: String, health: Int, attack: Int): Character(name, health, at
         println("ATK: $attack")
         println("Зелья: $potions")
         println("==============")
+    }
+
+    fun useShield(){
+        println("$name использовал щит, урон понижен в двое")
+        shield = true
+    }
+
+    override fun attack(target: Character) {
+        if (shield == true){
+            
+        }
+        super.attack(target)
     }
 }
 
@@ -86,6 +98,7 @@ fun main(){
 
     val gameInput = GameInput()
     val oleg = Player("Олежа", 100, 15)
+    val boris = Player("boris", 100, 20)
 
     println("Создание вашего персонажа: ")
     println("Введите имя игрока: ")
@@ -101,13 +114,17 @@ fun main(){
         println("=== Главное меню ===")
         println("1. Посмотреть статус")
         println("2. Использовать зелье")
-        println("3. Выйти из игры")
+        println("3. Использовать щит")
+        println("4. Сразится")
+        println("5. Выйти из игры")
 
-        val choise = gameInput.getNumberInput("Введите: 1, 2, 3")
+        val choise = gameInput.getNumberInput("Введите: 1, 2, 3, 4, 5")
         when(choise){
             1 -> customPlayer.printStatus()
             2 -> customPlayer.usePotions()
-            3 -> {
+            3 -> customPlayer.useShield()
+            4 -> boris.attack(customPlayer)
+            5 -> {
                 gameRunning = false
                 println("Выход из игры... бб")
             }
