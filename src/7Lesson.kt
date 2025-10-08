@@ -3,13 +3,13 @@ import kotlin.random.Random
 open class Character(val name: String, var health: Int, val attack: Int){
     val isAlive: Boolean get() = health > 0
 
-    fun takeDamage(damage: Int){
+    open fun takeDamage(damage: Int){
         health -= damage
         println("$name получает $damage")
         if(health <= 0) println("$name пал в бою!")
     }
 
-    open fun attack(target: Character){
+    fun attack(target: Character){
         if (!isAlive || !target.isAlive) return
         val damage = Random.nextInt(attack - 3, attack + 4) // Случайный урон в диапозоне
         println("$name атакует ${target.name}")
@@ -44,12 +44,21 @@ class Player(name: String, health: Int, attack: Int, var shield: Boolean = false
         shield = true
     }
 
-    override fun attack(target: Character) {
+    override fun takeDamage(damage: Int) {
         if (shield == true){
-            
+            val halfDamage = damage / 2
+            health -= halfDamage
+            println("$name получает $halfDamage")
+            if(health <= 0) println("$name пал в бою!")
+        }else{
+            health -= damage
+            println("$name получает $damage")
+            if(health <= 0) println("$name пал в бою!")
+            super.takeDamage(damage)
         }
-        super.attack(target)
     }
+
+
 }
 
 class GameInput{
@@ -118,7 +127,7 @@ fun main(){
         println("4. Сразится")
         println("5. Выйти из игры")
 
-        val choise = gameInput.getNumberInput("Введите: 1, 2, 3, 4, 5")
+        val choise = gameInput.getNumberInput("Введите: 1, 2, 3, 4, 5 ")
         when(choise){
             1 -> customPlayer.printStatus()
             2 -> customPlayer.usePotions()
