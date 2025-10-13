@@ -110,14 +110,14 @@ class GameWorld {
             println("6. Посмотреть инвентарь")
             println("7. Выйти из игры")
 
-            val choice = gameInput.getNumberInput("Выберете действие", 1, 6)
+            val choice = gameInput.getNumberInput("Выберете действие", 1, 7)
             when(choice){
                 1 -> currentLocation.describe()
                 2 -> combatMenu(player)
                 3 -> takeItemMenu(player)
                 4 -> moveToNextLocation()
                 5 -> player.usePotions()
-                6 -> checkInventure()
+                6 -> checkInventure(player)
                 7 -> gameRunning = false
             }
 
@@ -176,8 +176,8 @@ class GameWorld {
         println("Вы взяли: ${item.name}")
         // Здесь в реальной игре надо положить предмет в инвентарь игрока
 
-        //item.use(player)
-        //currentLocation.items.remove(item)
+        inventure.add(item)
+        currentLocation.items.remove(item)
     }
 
     private  fun  moveToNextLocation(){
@@ -193,7 +193,7 @@ class GameWorld {
         }
     }
 
-    private fun checkInventure(){
+    private fun checkInventure(player: Player){
         if (inventure.isEmpty()){
             println("У вас нет предметов")
             return
@@ -203,6 +203,14 @@ class GameWorld {
         inventure.forEachIndexed { index, item ->
             println("${index + 1}. ${item.name}")
         }
+
+        val choice = gameInput.getNumberInput("Ваш выбор: ", 1, inventure.size)
+        val item = inventure[choice - 1]
+
+        println("Вы изпользовали ${item.name}")
+        item.use(player)
+        inventure.remove(item)
+
     }
 }
 
